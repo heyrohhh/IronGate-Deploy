@@ -1,0 +1,39 @@
+services:
+  database:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  backend:
+    image: heyrohhh/iniback:v1
+    container_name: backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - database
+
+  frontend:
+    image: heyrohhh/inifront:v1
+    container_name: frontend
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  mysql_data:

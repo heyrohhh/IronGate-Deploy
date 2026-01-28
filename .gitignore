@@ -1,0 +1,59 @@
+# ==========================================
+# 1. Terraform (Heavy & Sensitive)
+# ==========================================
+# Local .terraform directory (Heavy - contains providers/modules)
+.terraform/
+.terraform.*
+
+# Terraform state files (SENSITIVE - contains secrets/IPs)
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Terraform variables (Agar aapne sensitive variables file banayi hai)
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+
+# ==========================================
+# 2. Environment & Secrets (SECURITY RISK)
+# ==========================================
+# Aapki .env file jisme DB passwords hain
+.env
+.env.local
+.env.*.local
+
+# SSH Keys (Aapki Portfolio_key.pem)
+*.pem
+*.key
+*.pub
+
+# ==========================================
+# 3. Node.js (Frontend & Backend)
+# ==========================================
+# Dependency folders (Very heavy)
+node_modules/
+jspm_packages/
+
+# Build outputs
+dist/
+build/
+.next/
+.out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
+
+# ==========================================
+# 4. OS & Editors
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
