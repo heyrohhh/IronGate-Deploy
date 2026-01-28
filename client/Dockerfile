@@ -7,4 +7,4 @@ RUN npm run build
 FROM nginx:stable-alpine
 COPY --from=BUILD /app/dist /usr/share/ngnix/html
 EXPOSE 80
-CMD ["ngnix", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
