@@ -21,14 +21,14 @@ jobs:
         with:
           context: ./server/
           push: true
-          tags: heyrohhh/iniback:latest
+          tags: heyrohhh/iniback:v1
 
       - name: Frontend build and push
         uses: docker/build-push-action@v4
         with:
           context: ./client/
           push: true
-          tags: heyrohhh/inifront:latest
+          tags: heyrohhh/inifront:v1
 
   Deploy:
     needs: build-and-push
