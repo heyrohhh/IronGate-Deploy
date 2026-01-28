@@ -3,10 +3,27 @@
   hosts: webserver
   become: true
   tasks:
-    - name: Install Docker 
+    - name: Install Docker & docker compose plugin
       dnf:
         name: docker
         state: present
+    - name: Create Docker cli-plugins directory
+      file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: '0755'
+
+    - name: Download Docker Compose Binary
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: '0755'
+
+    - name: Create a symlink for docker-compose (Optional but helpful)
+      file:
+        src: /usr/local/lib/docker/cli-plugins/docker-compose
+        dest: /usr/bin/docker-compose
+        state: link
 
     - name: Start and Enable Docker service
       service:
