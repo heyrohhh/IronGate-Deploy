@@ -46,7 +46,7 @@ resource "aws_autoscaling_group" "asg" {
 
    tag {
     key                 = "Name"
-    value               = "inventory-app"
+    value               = "app"
     propagate_at_launch = true
   }
 }
