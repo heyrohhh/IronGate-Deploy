@@ -4,12 +4,6 @@
   become: true
 
   tasks:
-    - name: Install Docker
-      yum:
-        name: docker
-        state: present
-        update_cache: yes
-
     - name: Start Docker
       service:
         name: docker
@@ -36,6 +30,11 @@
         dest: /home/ec2-user/app/nginx.conf
         owner: ec2-user
         group: ec2-user
+        
+    - name: Wait for Docker socket
+      wait_for:
+       path: /var/run/docker.sock
+       timeout: 60
 
     - name: Run containers
       become_user: ec2-user
