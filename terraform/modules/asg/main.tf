@@ -24,9 +24,9 @@ resource "aws_autoscaling_group" "asg" {
   health_check_grace_period = 300
 
   launch_template {
-    id      = aws_launch_template.inventory.id
-    version = "$Latest"
-  }
+  id      = aws_launch_template.inventory.id
+  version = aws_launch_template.inventory.latest_version
+}
 
  
 
