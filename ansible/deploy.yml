@@ -10,14 +10,7 @@
         state: present
         update_cache: yes
 
-    - name: Install docker-compose plugin
-      get_url:
-       url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
-       dest: /usr/local/lib/docker/cli-plugins/docker-compose
-       mode: '0755'
-
-
-    - name: Start and enable Docker
+    - name: Start Docker
       service:
         name: docker
         state: started
@@ -27,24 +20,25 @@
       file:
         path: /home/ec2-user/app
         state: directory
-        owner: root
-        group: root
+        owner: ec2-user
+        group: ec2-user
 
-    - name: Copy docker-compose file
+    - name: Copy docker-compose
       copy:
         src: files/docker-compose.yml
         dest: /home/ec2-user/app/docker-compose.yml
-        owner: root
-        group: root
+        owner: ec2-user
+        group: ec2-user
 
     - name: Copy nginx config
       copy:
         src: files/nginx.conf
         dest: /home/ec2-user/app/nginx.conf
-        owner: root
-        group: root
+        owner: ec2-user
+        group: ec2-user
 
-    - name: Start application containers
+    - name: Run containers
+      become_user: ec2-user
       shell: |
         docker compose pull
         docker compose up -d --remove-orphans

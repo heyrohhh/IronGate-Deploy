@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -37,32 +38,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Ansible & AWS deps
+      - name: Install Ansible + AWS deps
         run: |
           pip install ansible boto3 botocore
 
-      - name: Setup SSH
-        run: |
-         mkdir -p ~/.ssh
-         echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
-         chmod 600 ~/.ssh/id_rsa
-
-         cat <<EOF > ~/.ssh/config
-         Host bastion
-           HostName ${{ secrets.BASTION_PUBLIC_IP }}
-           User ec2-user
-           IdentityFile ~/.ssh/id_rsa
-           StrictHostKeyChecking no
-
-         Host *
-           ProxyJump bastion
-           StrictHostKeyChecking no
-         EOF
-
-      - name: Debug ansible.cfg
-        run: |
-          echo "---- ansible.cfg ----"
-          cat ansible/ansible.cfg || true
+     
 
       - name: Run Ansible deployment
         env:
@@ -70,5 +50,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
-          cd ansible 
+          cd ansible
           ansible-playbook deploy.yml
