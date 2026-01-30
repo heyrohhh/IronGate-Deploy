@@ -37,11 +37,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+    
       - name: Install Ansible + AWS deps
         run: |
+          pipx install ansible-core
+          pipx inject ansible-core boto3 botocore
           ansible-galaxy collection install amazon.aws
-          ansible-galaxy collection list | grep amazon
+
 
       - name: Setup SSH
         run: |
