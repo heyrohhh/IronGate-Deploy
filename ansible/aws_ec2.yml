@@ -1,15 +1,15 @@
-plugin: aws_ec2
+plugin: amazon.aws.aws_ec2
 
 regions:
   - us-east-1
 
 filters:
-  tag:Role: app
   instance-state-name: running
+  tag:Role: app
 
 hostnames:
   - private-ip-address
 
-compose:
-  ansible_ssh_common_args: >-
-    -o ProxyJump=ec2-user@{{ lookup('env','100.27.43.94') }}
+keyed_groups:
+  - key: tags.Role
+    prefix: role
