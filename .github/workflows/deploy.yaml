@@ -59,6 +59,10 @@ jobs:
            StrictHostKeyChecking no
          EOF
 
+      - name: Debug ansible.cfg
+        run: |
+          echo "---- ansible.cfg ----"
+          cat ansible/ansible.cfg || true
 
       - name: Run Ansible deployment
         env:
