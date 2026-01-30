@@ -1,0 +1,52 @@
+---
+- name: Deploy Inventory Application
+  hosts: role_app
+  become: true
+
+  tasks:
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+        update_cache: yes
+
+    - name: Install docker-compose plugin
+      get_url:
+       url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+       dest: /usr/local/lib/docker/cli-plugins/docker-compose
+       mode: '0755'
+
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create app directory
+      file:
+        path: /home/ec2-user/app
+        state: directory
+        owner: root
+        group: root
+
+    - name: Copy docker-compose file
+      copy:
+        src: files/docker-compose.yml
+        dest: /home/ec2-user/app/docker-compose.yml
+        owner: root
+        group: root
+
+    - name: Copy nginx config
+      copy:
+        src: files/nginx.conf
+        dest: /home/ec2-user/app/nginx.conf
+        owner: root
+        group: root
+
+    - name: Start application containers
+      shell: |
+        docker compose pull
+        docker compose up -d --remove-orphans
+      args:
+        chdir: /home/ec2-user/app
