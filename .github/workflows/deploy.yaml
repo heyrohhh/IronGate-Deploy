@@ -43,20 +43,22 @@ jobs:
 
       - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+         mkdir -p ~/.ssh
+         echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+         chmod 600 ~/.ssh/id_rsa
 
-          cat <<EOF > ~/.ssh/config
-          Host bastion
-            HostName ${{ secrets.BASTION_PUBLIC_IP }}
-            User ec2-user
-            IdentityFile ~/.ssh/id_rsa
-            StrictHostKeyChecking no
+         cat <<EOF > ~/.ssh/config
+         Host bastion
+           HostName ${{ secrets.BASTION_PUBLIC_IP }}
+           User ec2-user
+           IdentityFile ~/.ssh/id_rsa
+           StrictHostKeyChecking no
 
-          Host *
-            ProxyJump bastion
-          EOF
+         Host *
+           ProxyJump bastion
+           StrictHostKeyChecking no
+         EOF
+
 
       - name: Run Ansible deployment
         env:
