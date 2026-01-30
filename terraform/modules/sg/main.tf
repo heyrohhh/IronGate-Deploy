@@ -58,17 +58,21 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   ingress {
-       security_groups = [aws_security_group.bastion_sg.id]
-       from_port = 22
-       to_port = 22
-       protocol = "tcp"   
-  }
-  ingress {
-       security_groups = [aws_security_group.alb_sg.id]
-       from_port = 80
-       to_port = 80
-       protocol = "tcp"   
-  }
+  description     = "SSH from bastion"
+  from_port       = 22
+  to_port         = 22
+  protocol        = "tcp"
+  security_groups = [aws_security_group.bastion_sg.id]
+}
+
+ingress {
+  description     = "HTTP from ALB"
+  from_port       = 80
+  to_port         = 80
+  protocol        = "tcp"
+  security_groups = [aws_security_group.alb_sg.id]
+}
+
 
  egress {
        from_port = 0
