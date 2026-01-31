@@ -5,13 +5,13 @@
   vars:
     ansible_aws_ssm_region: us-east-1
   tasks:
-    - name: Test SSM command execution
-      raw: uptime
+    - name: Test SSM raw execution
+      ansible.builtin.raw: uptime
       register: uptime_output
 
-    - name: Debug Output
-      debug:
-        msg: "{{ uptime_output.stdout }}"
+    - name: Show uptime
+      ansible.builtin.debug:
+      msg: "{{ uptime_output.stdout }}"
 
     - name: Ensure Docker is running
       ansible.builtin.service:
