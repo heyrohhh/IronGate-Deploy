@@ -40,9 +40,8 @@ jobs:
     
       - name: Install Ansible + deps
         run: |
-            pipx install ansible-core
-            pipx inject ansible-core boto3 botocore
-            ansible-galaxy collection install amazon.aws
+           pip install ansible boto3 botocore
+           ansible-galaxy collection install amazon.aws community.aws
 
       - name: Deploy via SSM
         env:
@@ -54,5 +53,5 @@ jobs:
          sudo dpkg -i session-manager-plugin.deb
          aws ssm describe-instance-information --region us-east-1
          cd ansible
-         ansible-playbook -i aws_ec2.yml deploy.yml
+         ansible-playbook -i aws_ec2.yml deploy.yml -vvv
 

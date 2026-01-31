@@ -1,11 +1,11 @@
 - name: Deploy Inventory Application
   hosts: app
-  connection: aws_ssm       
-  gather_facts: true 
+  connection: community.aws.aws_ssm  # Full path use karein
+  gather_facts: true
+  become: true
   vars:
     ansible_aws_ssm_region: us-east-1
-  become: true
-
+    ansible_user: ec2-user
   tasks:
     - name: Ensure docker running
       service:
