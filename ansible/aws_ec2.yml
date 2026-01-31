@@ -9,3 +9,7 @@ filters:
 
 hostnames:
   - instance-id
+keyed_groups:
+  - key: tags.Role
+    prefix: ""
+    separator: ""

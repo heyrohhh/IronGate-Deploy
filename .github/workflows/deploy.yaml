@@ -51,5 +51,5 @@ jobs:
          AWS_DEFAULT_REGION: us-east-1
         run: |
          cd ansible
-         ansible-playbook deploy.yml
+         ansible-playbook -i aws_ec2.yml deploy.yml
 
