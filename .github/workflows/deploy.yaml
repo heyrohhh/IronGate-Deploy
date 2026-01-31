@@ -46,7 +46,7 @@ jobs:
     - name: Deploy using SSM
       id: ssm
       run: |
-        COMMAND_ID=$(aws ssm send-command \
+        COMMAND_ID=$(aws ssm send-command \ 
           --document-name "AWS-RunShellScript" \
           --targets "Key=tag:Role,Values=app" \
           --comment "CI Deploy" \
