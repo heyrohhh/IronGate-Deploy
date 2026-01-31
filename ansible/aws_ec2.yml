@@ -5,7 +5,7 @@ regions:
 filters:
   instance-state-name: running
   tag:Role: app
-
+  
 hostnames:
   - instance-id
 
