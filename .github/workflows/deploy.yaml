@@ -51,9 +51,11 @@ jobs:
        --comment "CI Deploy" \
        --parameters 'commands=[
         "set -e",
-        "cd /home/ec2-user/app",
-        "docker compose pull",
-        "docker compose up -d --remove-orphans"
+        systemctl restart docker
+        "cd /home/ec2-user/app"
+        "sudo docker compose pull frontend"
+        "sudo docker compose up -d --force-recreate frontend"
+
        ]' \
        --query "Command.CommandId" \
        --output text)
