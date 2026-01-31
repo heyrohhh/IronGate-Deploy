@@ -51,10 +51,9 @@ jobs:
        --comment "CI Deploy" \
        --parameters 'commands=[
         "set -e",
-        systemctl restart docker
-        "cd /home/ec2-user/app"
-        "sudo docker compose pull frontend"
-        "sudo docker compose up -d --force-recreate frontend"
+        cd /home/ec2-user/app
+        sudo docker compose pull frontend
+        sudo docker compose up -d --force-recreate frontend
 
        ]' \
        --query "Command.CommandId" \
