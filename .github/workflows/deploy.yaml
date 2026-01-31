@@ -51,11 +51,13 @@ jobs:
           --targets "Key=tag:Role,Values=app" \
           --comment "CI Deploy" \
           --parameters commands='[
-            "set -e",
-            "cd /home/ec2-user/app",
-            "docker compose pull",
-            "docker compose up -d --remove-orphans"
-          ]' \
+           "set -e",
+           "systemctl is-active docker || systemctl start docker",
+           "mkdir -p /home/ec2-user/app",
+           "cd /home/ec2-user/app",
+           "docker compose pull",
+          "docker compose up -d --remove-orphans"
+        ]'\
           --query "Command.CommandId" \
           --output text)
 
