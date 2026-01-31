@@ -1,14 +1,17 @@
 - name: Deploy Inventory Application
   hosts: app
+  connection: amazon.aws.aws_ssm
   gather_facts: false
-
+  vars:
+    ansible_aws_ssm_region: us-east-1
   tasks:
     - name: Test SSM command execution
-      ansible.builtin.command: uptime
+      raw: uptime
+      become: true
       register: uptime_output
 
-    - name: Show uptime
-      ansible.builtin.debug:
+    - name: Debug Output
+      debug:
         msg: "{{ uptime_output.stdout }}"
 
     - name: Ensure Docker is running
