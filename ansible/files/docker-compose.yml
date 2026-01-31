@@ -1,12 +1,8 @@
 services:
   database:
     image: mysql:8.0
-    container_name: mysql
     env_file:
-       - .env
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      - .env
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
@@ -15,18 +11,16 @@ services:
 
   backend:
     image: heyrohhh/iniback:v1
-    container_name: backend
-    restart: unless-stopped
     env_file:
       - .env
     depends_on:
       - database
+    restart: unless-stopped
     networks:
       - app-network
 
   frontend:
-    image: heyrohhh/inifront:v2
-    container_name: frontend
+    image: heyrohhh/inifront:v3
     depends_on:
       - backend
     networks:
@@ -34,7 +28,6 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx-proxy
     ports:
       - "80:80"
     volumes:
@@ -49,5 +42,5 @@ volumes:
   mysql_data:
 
 networks:
- app-network:
+  app-network:
     driver: bridge
