@@ -1,43 +1,45 @@
 - name: Deploy Inventory Application
   hosts: app
-  connection: amazon.aws.aws_ssm
   gather_facts: false
-  # become: true
+
   tasks:
-    - name: Ping test without sudo
-      raw: uptime
+    - name: Test SSM command execution
+      ansible.builtin.command: uptime
       register: uptime_output
 
     - name: Show uptime
-      debug:
+      ansible.builtin.debug:
         msg: "{{ uptime_output.stdout }}"
 
-    - name: Ensure docker running
-      service:
+    - name: Ensure Docker is running
+      ansible.builtin.service:
         name: docker
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Create app directory
-      file:
+      ansible.builtin.file:
         path: /home/ec2-user/app
         state: directory
         owner: ec2-user
         group: ec2-user
+        mode: "0755"
 
-    - name: Copy compose file
-      copy:
+    - name: Copy docker-compose file
+      ansible.builtin.copy:
         src: files/docker-compose.yml
         dest: /home/ec2-user/app/docker-compose.yml
+        owner: ec2-user
+        group: ec2-user
 
     - name: Copy nginx config
-      copy:
+      ansible.builtin.copy:
         src: files/nginx.conf
         dest: /home/ec2-user/app/nginx.conf
+        owner: ec2-user
+        group: ec2-user
 
-    - name: Run containers
-      shell: |
-        docker compose pull
-        docker compose up -d --remove-orphans
+    - name: Deploy containers
+      ansible.builtin.command: docker compose up -d --remove-orphans
       args:
         chdir: /home/ec2-user/app

@@ -37,22 +37,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-    
-      - name: Install Ansible + deps
+
+      - name: Set Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install system deps
         run: |
-          pip uninstall -y ansible ansible-core
-          pip install ansible boto3 botocore
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      - name: Install Session Manager Plugin
+        run: |
+          curl -fsSL https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb -o session-manager-plugin.deb
+          sudo dpkg -i session-manager-plugin.deb
+
+      - name: Install Ansible and AWS libs
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core==2.15.*
+          pip install boto3 botocore
           ansible-galaxy collection install amazon.aws community.aws --force
 
       - name: Deploy via SSM
         env:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
         run: |
-         curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
-         sudo dpkg -i session-manager-plugin.deb
-         aws ssm describe-instance-information --region us-east-1
-         cd ansible
-         ansible-playbook -i aws_ec2.yml deploy.yml -vvv
-
+          aws ssm describe-instance-information
+          cd ansible
+          ansible-playbook -i aws_ec2.yml deploy.yml -vv
