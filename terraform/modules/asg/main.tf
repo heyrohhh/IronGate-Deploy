@@ -1,3 +1,4 @@
+
 resource "aws_iam_role" "ssm_role"{
   name = "ssm-role"
 
@@ -31,7 +32,6 @@ resource "aws_launch_template" "inventory" {
   image_id      = "ami-0532be01f26a3de55"
   instance_type = "t3.micro"
   vpc_security_group_ids = [var.ec2_sg_id]
-  key_name = "Portfolio_key"
    iam_instance_profile {
     name = aws_iam_instance_profile.ssm_profile.name
   }
