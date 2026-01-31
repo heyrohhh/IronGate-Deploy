@@ -52,6 +52,8 @@ jobs:
           which ansible-playbook
           ansible-playbook --version
           python --version
+          ansible-galaxy collection list | grep amazon.aws
+
 
       - name: Deploy via SSM
         env:
