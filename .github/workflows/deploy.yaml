@@ -40,8 +40,9 @@ jobs:
     
       - name: Install Ansible + deps
         run: |
-           pip install ansible boto3 botocore
-           ansible-galaxy collection install amazon.aws community.aws
+          pip uninstall -y ansible ansible-core
+          pip install ansible boto3 botocore
+          ansible-galaxy collection install amazon.aws community.aws --force
 
       - name: Deploy via SSM
         env:
