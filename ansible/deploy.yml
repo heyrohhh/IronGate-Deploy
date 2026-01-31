@@ -1,12 +1,17 @@
 - name: Deploy Inventory Application
   hosts: app
-  connection: community.aws.aws_ssm  # Full path use karein
-  gather_facts: true
+  connection: amazon.aws.aws_ssm
+  gather_facts: false
   become: true
-  vars:
-    ansible_aws_ssm_region: us-east-1
-    ansible_user: ec2-user
   tasks:
+    - name: Ping test
+      raw: uptime
+      register: uptime_output
+
+    - name: Show uptime
+      debug:
+        msg: "{{ uptime_output.stdout }}"
+
     - name: Ensure docker running
       service:
         name: docker

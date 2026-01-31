@@ -10,9 +10,10 @@ hostnames:
   - instance-id
 
 compose:
-  ansible_connection: "'aws_ssm'"
+  ansible_connection: "'amazon.aws.aws_ssm'"
   ansible_aws_ssm_region: "'us-east-1'"
   ansible_user: "'ec2-user'"
+  ansible_shell_type: "'sh'"
 
 keyed_groups:
   - key: tags.Role
