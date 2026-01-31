@@ -97,7 +97,7 @@ jobs:
 
         for i in {1..30}; do
           HEALTHY_COUNT=$(aws elbv2 describe-target-health \
-            --target-group-arn ${{ secrets.ALB_TARGET_GROUP_ARN }} \
+            --target-group-arn ${{ secrets.ALB_TARGET_GROUP_ARN }} \ 
             --query "TargetHealthDescriptions[?TargetHealth.State=='healthy'] | length(@)" \
             --output text)
 
