@@ -2,15 +2,11 @@
   hosts: app
   connection: amazon.aws.aws_ssm
   gather_facts: false
+  # become: true
   tasks:
-    - name: Ping test
+    - name: Ping test without sudo
       raw: uptime
-      become: true 
       register: uptime_output
-
-    - name: Show uptime
-      debug:
-        msg: "{{ uptime_output.stdout }}"
 
     - name: Show uptime
       debug:
