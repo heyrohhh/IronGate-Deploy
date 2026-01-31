@@ -32,40 +32,84 @@ jobs:
           tags: heyrohhh/inifront:latest
 
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
+   needs: build
+   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set Python 3.10
-        uses: actions/setup-python@v5
-        with:
-         python-version: "3.10"
-        
-      - name: Install Ansible stack
-        run: |
-          rm -rf ~/.ansible/collections/ansible_collections/amazon
-          rm -rf ~/.ansible/collections/ansible_collections/community
-          python -m pip install --upgrade pip
-          python -m pip install ansible-core==2.15.13 boto3 botocore
-          ansible-galaxy collection install amazon.aws:10.0.0 community.aws:10.0.0
-      - name: Debug Ansible runtime
-        run: |
-          which ansible-playbook
-          ansible-playbook --version
-          python --version
-          ansible-galaxy collection list | grep amazon.aws
+   steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
+    - name: Deploy using SSM
+      id: ssm
+      run: |
+        COMMAND_ID=$(aws ssm send-command \
+          --document-name "AWS-RunShellScript" \
+          --targets "Key=tag:Role,Values=app" \
+          --comment "CI Deploy" \
+          --parameters commands='[
+            "set -e",
+            "cd /home/ec2-user/app",
+            "docker compose pull",
+            "docker compose up -d --remove-orphans"
+          ]' \
+          --query "Command.CommandId" \
+          --output text)
 
-      - name: Deploy via SSM
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-          AWS_REGION: us-east-1 
-        run: |
-           curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
-           sudo dpkg -i session-manager-plugin.deb
-           aws ssm describe-instance-information --region us-east-1
-           cd ansible
-           ansible-playbook -i aws_ec2.yml deploy.yml -vv
+        echo "SSM Command ID: $COMMAND_ID"
+        echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_ENV
+
+    - name: Wait for SSM command to finish
+      run: |
+        echo "Waiting for SSM command to complete..."
+
+        for i in {1..30}; do
+          STATUS=$(aws ssm list-command-invocations \
+            --command-id $COMMAND_ID \
+            --details \
+            --query "CommandInvocations[].Status" \
+            --output text)
+
+          echo "SSM status: $STATUS"
+
+          if [[ "$STATUS" == *"Success"* ]]; then
+            echo "SSM command completed successfully"
+            exit 0
+          fi
+
+          if [[ "$STATUS" == *"Failed"* ]]; then
+            echo "SSM command failed"
+            exit 1
+          fi
+
+          sleep 5
+        done
+
+        echo "ERROR: SSM command did not finish in time"
+        exit 1
+
+    - name: Wait for ALB targets to become healthy
+      run: |
+        echo "Waiting for ALB targets to become healthy (max 5 minutes)..."
+
+        for i in {1..30}; do
+          HEALTHY_COUNT=$(aws elbv2 describe-target-health \
+            --target-group-arn ${{ secrets.ALB_TARGET_GROUP_ARN }} \
+            --query "TargetHealthDescriptions[?TargetHealth.State=='healthy'] | length(@)" \
+            --output text)
+
+          echo "Healthy targets: $HEALTHY_COUNT"
+
+          if [ "$HEALTHY_COUNT" -ge 1 ]; then
+            echo "Deployment successful: ALB has healthy targets"
+            exit 0
+          fi
+
+          sleep 10
+        done
+
+        echo "ERROR: ALB targets did not become healthy"
+        exit 1

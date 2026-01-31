@@ -35,20 +35,93 @@ resource "aws_launch_template" "inventory" {
    iam_instance_profile {
     name = aws_iam_instance_profile.ssm_profile.name
   }
- user_data = base64encode(<<-EOF
- #!/bin/bash
- dnf update -y
- dnf install -y docker
- systemctl start docker
- systemctl enable docker
- usermod -aG docker ec2-user
- mkdir -p /usr/local/lib/docker/cli-plugins
- curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
-  -o /usr/local/lib/docker/cli-plugins/docker-compose
- chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
- systemctl restart docker
- EOF
+user_data = base64encode(<<-USERDATA
+#!/bin/bash
+set -e
+
+dnf update -y
+dnf install -y docker
+systemctl enable docker
+systemctl start docker
+usermod -aG docker ec2-user
+
+mkdir -p /usr/libexec/docker/cli-plugins
+curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+  -o /usr/libexec/docker/cli-plugins/docker-compose
+chmod +x /usr/libexec/docker/cli-plugins/docker-compose
+
+mkdir -p /home/ec2-user/app
+
+cat <<'COMPOSE' > /home/ec2-user/app/docker-compose.yml
+services:
+  database:
+    image: mysql:8.0
+    env_file:
+      - .env
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  backend:
+    image: heyrohhh/iniback:latest
+    env_file:
+      - .env
+    depends_on:
+      - database
+    restart: unless-stopped
+
+  frontend:
+    image: heyrohhh/inifront:latest
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  mysql_data:
+COMPOSE
+
+cat <<'NGINX' > /home/ec2-user/app/nginx.conf
+server {
+  listen 80;
+
+  location / {
+    proxy_pass http://frontend:80;
+  }
+
+  location /api/ {
+    proxy_pass http://backend:3001;
+  }
+
+  location /health {
+    return 200 "OK";
+  }
+}
+NGINX
+
+cat <<'ENV' > /home/ec2-user/app/.env
+MYSQL_ROOT_PASSWORD=secret123
+MYSQL_DATABASE=inventory
+ENV
+
+chown -R ec2-user:ec2-user /home/ec2-user/app
+
+su - ec2-user -c "
+cd /home/ec2-user/app &&
+docker compose pull &&
+docker compose up -d
+"
+USERDATA
 )
+
   tag_specifications {
      resource_type = "instance"
 
@@ -73,12 +146,16 @@ resource "aws_autoscaling_group" "asg" {
   id      = aws_launch_template.inventory.id
   version = aws_launch_template.inventory.latest_version
 }
+tag {
+  key                 = "Role"
+  value               = "app"
+  propagate_at_launch = true
+}
 
- 
+tag {
+  key                 = "Name"
+  value               = "inventory-app"
+  propagate_at_launch = true
+}
 
-   tag {
-    key                 = "Name"
-    value               = "app"
-    propagate_at_launch = true
-  }
 }
