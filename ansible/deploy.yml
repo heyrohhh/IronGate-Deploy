@@ -1,5 +1,9 @@
 - name: Deploy Inventory Application
   hosts: app
+  connection: aws_ssm       
+  gather_facts: true 
+  vars:
+    ansible_aws_ssm_region: us-east-1
   become: true
 
   tasks:
