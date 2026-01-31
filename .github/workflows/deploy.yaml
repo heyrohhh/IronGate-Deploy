@@ -52,20 +52,17 @@ jobs:
         run: |
           curl -fsSL https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb -o session-manager-plugin.deb
           sudo dpkg -i session-manager-plugin.deb
-
-      - name: Install Ansible and AWS libs
+      - name: Install Ansible + deps
         run: |
-          python -m pip install --upgrade pip
-          pip install ansible-core==2.15.*
-          pip install boto3 botocore
+          pip install "ansible-core>=2.16" boto3 botocore
           ansible-galaxy collection install amazon.aws community.aws --force
-
+          
       - name: Deploy via SSM
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
-          aws ssm describe-instance-information
           cd ansible
-          ansible-playbook -i aws_ec2.yml deploy.yml -vv
+          ansible-inventory -i aws_ec2.yml --graph 
+          ansible-playbook -i aws_ec2.yml deploy.yml

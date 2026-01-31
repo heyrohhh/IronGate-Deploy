@@ -1,5 +1,4 @@
 plugin: amazon.aws.aws_ec2
-
 regions:
   - us-east-1
 
@@ -10,10 +9,12 @@ filters:
 hostnames:
   - instance-id
 
-compose:
-  ansible_connection: amazon.aws.aws_ssm
-  ansible_aws_ssm_region: us-east-1
-
 keyed_groups:
   - key: tags.Role
     prefix: ""
+    separator: ""
+
+compose:
+  ansible_connection: "'amazon.aws.aws_ssm'"
+  ansible_aws_ssm_region: "'us-east-1'"
+  ansible_user: "'ec2-user'"
