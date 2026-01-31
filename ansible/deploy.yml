@@ -1,5 +1,5 @@
 - name: Deploy Inventory Application
-  hosts: role_app
+  hosts: app
   become: true
 
   tasks:
