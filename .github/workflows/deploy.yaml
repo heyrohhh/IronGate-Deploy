@@ -22,7 +22,7 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: heyrohhh/iniback:latest
+          tags: heyrohhh/iniback:v1
 
       - name: Build & push frontend
         uses: docker/build-push-action@v4
