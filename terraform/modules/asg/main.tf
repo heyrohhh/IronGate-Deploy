@@ -61,32 +61,39 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
+    networks:
+      - app-network
 
   backend:
-    image: heyrohhh/iniback:latest
+    image: heyrohhh/iniback:v1
     env_file:
       - .env
     depends_on:
       - database
     restart: unless-stopped
-
+    networks:
+      - app-network
   frontend:
-    image: heyrohhh/inifront:latest
-    depends_on:
-      - backend
+   image: heyrohhh/inifront:v3
+   networks:
+    - app-network
 
   nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - frontend
-      - backend
+   image: nginx:latest
+   ports:
+    - "80:80"
+   volumes:
+    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+   depends_on:
+    - frontend
+    - backend
 
 volumes:
   mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
 COMPOSE
 
 cat <<'NGINX' > /home/ec2-user/app/nginx.conf
