@@ -92,24 +92,33 @@ jobs:
         exit 1
 
     - name: Wait for ALB targets to become healthy
+      env:
+       TARGET_GROUP_ARN: ${{ secrets.ALB_TARGET_GROUP_ARN }}
       run: |
-        echo "Waiting for ALB targets to become healthy (max 5 minutes)..."
+       echo "TARGET_GROUP_ARN=$TARGET_GROUP_ARN"
 
-        for i in {1..30}; do
-          HEALTHY_COUNT=$(aws elbv2 describe-target-health \
-            --target-group-arn ${{ secrets.ALB_TARGET_GROUP_ARN }} \ 
-            --query "TargetHealthDescriptions[?TargetHealth.State=='healthy'] | length(@)" \
-            --output text)
+       if [ -z "$TARGET_GROUP_ARN" ]; then
+       echo "ERROR: TARGET_GROUP_ARN is EMPTY"
+       exit 1
+       fi
 
-          echo "Healthy targets: $HEALTHY_COUNT"
+       echo "Waiting for ALB targets to become healthy..."
 
-          if [ "$HEALTHY_COUNT" -ge 1 ]; then
-            echo "Deployment successful: ALB has healthy targets"
-            exit 0
-          fi
+       for i in {1..30}; do
+       HEALTHY_COUNT=$(aws elbv2 describe-target-health \
+        --target-group-arn "$TARGET_GROUP_ARN" \
+        --query "TargetHealthDescriptions[?TargetHealth.State=='healthy'] | length(@)" \
+        --output text)
 
-          sleep 10
-        done
+       echo "Healthy targets: $HEALTHY_COUNT"
+  
+       if [ "$HEALTHY_COUNT" -ge 1 ]; then
+        echo "ALB healthy"
+        exit 0
+       fi
 
-        echo "ERROR: ALB targets did not become healthy"
-        exit 1
+       sleep 10
+       done
+
+       echo "ERROR: ALB targets never became healthy"
+       exit 1
