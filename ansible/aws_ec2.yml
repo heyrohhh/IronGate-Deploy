@@ -9,7 +9,8 @@ filters:
 
 hostnames:
   - instance-id
-keyed_groups:
-  - key: tags.Role
-    prefix: ""
-    separator: ""
+
+compose:
+  ansible_connection: "'aws_ssm'"
+  ansible_user: "'ec2-user'"
+  ansible_aws_ssm_region: "'us-east-1'"
