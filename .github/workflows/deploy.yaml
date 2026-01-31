@@ -29,7 +29,7 @@ jobs:
         with:
           context: ./client
           push: true
-          tags: heyrohhh/inifront:latest
+          tags: heyrohhh/inifront:v2
 
   deploy:
    needs: build

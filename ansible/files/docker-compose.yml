@@ -25,7 +25,7 @@ services:
       - app-network
 
   frontend:
-    image: heyrohhh/inifront:v1
+    image: heyrohhh/inifront:v2
     container_name: frontend
     depends_on:
       - backend
