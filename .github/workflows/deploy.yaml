@@ -40,9 +40,11 @@ jobs:
     
       - name: Install Ansible + deps
         run: |
-          pip uninstall -y ansible ansible-core
-          pip install ansible boto3 botocore
-          ansible-galaxy collection install amazon.aws community.aws --force
+          pip install --upgrade pip
+          pip install ansible-core==2.15.13
+          pip install boto3 botocore
+          ansible-galaxy collection install amazon.aws:10.0.0 community.aws:10.0.0
+
 
       - name: Deploy via SSM
         env:
@@ -55,5 +57,4 @@ jobs:
            sudo dpkg -i session-manager-plugin.deb
            aws ssm describe-instance-information --region us-east-1
            cd ansible
-           ansible-playbook -i aws_ec2.yml deploy.yml -e "ansible_aws_ssm_region=us-east-1" -vvv
-
+           ansible-playbook -i aws_ec2.yml deploy.yml -vv
