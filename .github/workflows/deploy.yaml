@@ -38,39 +38,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
     
-      - name: Install Ansible + AWS deps
+      - name: Install Ansible + deps
         run: |
-          pipx install ansible-core
-          pipx inject ansible-core boto3 botocore
-          ansible-galaxy collection install amazon.aws
+            pipx install ansible-core
+            pipx inject ansible-core boto3 botocore
+            ansible-galaxy collection install amazon.aws
 
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          cat > ~/.ssh/config <<EOF
-          Host bastion
-            HostName ${{ secrets.BASTION_PUBLIC_IP }}
-            User ec2-user
-            IdentityFile ~/.ssh/id_rsa
-            StrictHostKeyChecking no
-
-          Host *
-            ProxyJump bastion
-            StrictHostKeyChecking no
-          EOF
-
-
-
-      - name: Run Ansible deployment
+      - name: Deploy via SSM
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-          BASTION_PUBLIC_IP: ${{ secrets.BASTION_PUBLIC_IP }}
+         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         AWS_DEFAULT_REGION: us-east-1
         run: |
-          cd ansible
-          ansible-playbook deploy.yml
+         cd ansible
+         ansible-playbook deploy.yml
+

@@ -8,8 +8,4 @@ filters:
   tag:Role: app
 
 hostnames:
-  - private-ip-address
-
-keyed_groups:
-  - key: tags.Role
-    prefix: role
+  - instance-id

@@ -1,9 +1,40 @@
+resource "aws_iam_role" "ssm_role"{
+  name = "ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_core" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm_profile" {
+  name = "ec2-ssm-profile"
+  role = aws_iam_role.ssm_role.name
+}
+
 resource "aws_launch_template" "inventory" {
   name_prefix   = "inventory"
   image_id      = "ami-0532be01f26a3de55"
   instance_type = "t3.micro"
   vpc_security_group_ids = [var.ec2_sg_id]
   key_name = "Portfolio_key"
+   iam_instance_profile {
+    name = aws_iam_instance_profile.ssm_profile.name
+  }
  user_data = base64encode(<<-EOF
  #!/bin/bash
  dnf update -y
@@ -27,6 +58,7 @@ resource "aws_launch_template" "inventory" {
             }
         }
     }
+
 
 resource "aws_autoscaling_group" "asg" {
   desired_capacity   = 2
