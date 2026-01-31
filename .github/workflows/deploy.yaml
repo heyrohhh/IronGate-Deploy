@@ -44,6 +44,8 @@ jobs:
         
       - name: Install Ansible stack
         run: |
+          rm -rf ~/.ansible/collections/ansible_collections/amazon
+          rm -rf ~/.ansible/collections/ansible_collections/community
           python -m pip install --upgrade pip
           python -m pip install ansible-core==2.15.13 boto3 botocore
           ansible-galaxy collection install amazon.aws:10.0.0 community.aws:10.0.0
