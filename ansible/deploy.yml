@@ -7,7 +7,6 @@
   tasks:
     - name: Test SSM command execution
       raw: uptime
-      become: true
       register: uptime_output
 
     - name: Debug Output
