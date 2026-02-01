@@ -86,7 +86,7 @@ services:
     - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
    depends_on:
     - frontend
-    - backend
+    - backend 
 
 volumes:
   mysql_data:
@@ -97,21 +97,27 @@ networks:
 COMPOSE
 
 cat <<'NGINX' > /home/ec2-user/app/nginx.conf
+resolver 127.0.0.11 valid=10s ipv6=off;
+
 server {
   listen 80;
 
   location / {
-    proxy_pass http://frontend:80;
+    set $frontend frontend;
+    proxy_pass http://$frontend:80;
   }
 
   location /api/ {
-    proxy_pass http://backend:3001;
+    set $backend backend;
+    proxy_pass http://$backend:3001;
   }
 
   location /health {
     return 200 "OK";
   }
 }
+
+
 NGINX
 
 cat <<'ENV' > /home/ec2-user/app/.env
