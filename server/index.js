@@ -31,11 +31,6 @@ db.getConnection((err, connection) => {
     }
 });
 
-// --- HELPER: Health Check ---
-app.get('/', (req, res) => {
-    res.send("Backend Server is running and healthy!");
-});
-
 // --- AUTH ROUTES ---
 
 // 1. REGISTER
@@ -83,6 +78,12 @@ app.get('/inventory', (req, res) => {
     db.query('SELECT * FROM products', (err, result) => {
         if (err) return res.status(500).send(err);
         res.send(result);
+    });
+});
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        uptime: process.uptime()
     });
 });
 
